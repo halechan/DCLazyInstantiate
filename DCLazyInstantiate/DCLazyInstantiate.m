@@ -122,8 +122,17 @@ DEF_SINGLETON(DCLazyInstantiate);
                         result = [NSString stringWithFormat:@"- (%@ *)%@ {\n\treturn [[%@ alloc] init];\n}\n\n",
                                   class, varName, class];
                     } else {
-                        result = [NSString stringWithFormat:@"- (%@ *)%@ {\n\tif(_%@ == nil) {\n\t\t_%@ = [[%@ alloc] init];\n\t}\n\treturn _%@;\n}\n\n",
-                                  class, varName, varName, varName, class, varName];
+                        NSString *initString = @"init";
+                        
+                        if ([class isEqualTo:@"UICollectionView"]) {
+                            initString = @"initWithFrame:CGRectZero collectionViewLayout:<# layout #>";
+                        }
+                        else if([class isEqualTo:@"UITableView"]){
+                            initString = @"initWithFrame:CGRectZero style:UITableViewStylePlain";
+                        }
+                        
+                        result = [NSString stringWithFormat:@"- (%@ *)%@ {\n\tif(!_%@) {\n\t\t_%@ = [[%@ alloc] %@];\n\t}\n\treturn _%@;\n}\n\n",
+                                  class, varName, varName, varName, class, initString, varName];
                     }
                 }
             }
